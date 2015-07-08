@@ -70,7 +70,7 @@ fn get_team_string(team: &str, cursor: Cursor) -> Result<String, String> {
         None => return Err(format!("Invalid team: {}", team).to_owned())
     };
 
-    let mut string = format!("<h1>{}</h1><table>", team_name);
+    let mut string = format!("<h1>{}</h1><h2><a href=\"/\">Go back</a><h2><table>", team_name);
 
     for player_result in cursor {
         let player = match player_result {
