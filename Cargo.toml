@@ -1,0 +1,15 @@
+[package]
+name = "rest-api"
+version = "0.1.0"
+authors = ["Saghm Rossi <saghmrossi@gmail.com>"]
+
+[dependencies]
+rustful = "0.2.2"
+
+[dependencies.bson]
+git = "https://github.com/zonyitoo/bson-rs"
+ref = "a62d7448682455642e759088138592a508c25150"
+
+[dependencies.mongodb]
+git = "https://github.com/saghm/mongo-rust-driver-prototype"
+branch = "change-borrows-to-arcs"
