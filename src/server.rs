@@ -70,7 +70,7 @@ fn get_team_string(team: &str, cursor: Cursor) -> Result<String, String> {
         None => return Err(format!("Invalid team: {}", team).to_owned())
     };
 
-    let mut string = format!("<h1>{}</h1><h2><a href=\"/\">Go back</a><h2><table>", team_name);
+    let mut string = format!("<h2>{}</h2><h3><a href=\"/\">Go back</a><h3><table>", team_name);
 
     for player_result in cursor {
         let player = match player_result {
@@ -126,4 +126,29 @@ pub fn select_team(_client: Client, _context: Context, response: Response) {
                        })()\">Select Team</button>");
 
     response.into_writer().send(string);
+}
+
+pub fn get_high_average_counts(client: Client) -> Result<Cursor, String> {
+    /*
+    { $match: { position: { $ne: "P" }, avg: { $gte: 0.3 } } },
+    { $group: { _id: "$team" , count: { $sum: 1 } } },
+    { $sort: { count: -1, _id: -1 } }
+    */
+
+    let db = client.db("mlb");
+    let coll = db.collection("players");
+    let pipeline = vec![
+        doc! {
+            "position" => { "$ne" => "P" },
+            "avg" => { "$gte" => 0.3 }
+        },
+        doc! {
+            "$group" => { "_id" => "$team", "count" => { "$sum" => 1 } }
+        },
+        doc! {
+            "$sort" => { "count" => -1, "_id" => -1 }
+        }
+    ];
+
+    let
 }
