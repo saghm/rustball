@@ -1,12 +1,12 @@
 use std::error::Error;
 
 use bson::{Bson, Document};
-use mongodb::cursor::Cursor;
 use mongodb::{Client, ThreadedClient};
-use mongodb::db::ThreadedDatabase;
 use mongodb::coll::options::FindOptions;
+use mongodb::cursor::Cursor;
+use mongodb::db::ThreadedDatabase;
+use mongodb::error::Result as MongoResult;
 use rustful::{Context, Response};
-use team;
 
 macro_rules! err_as_string {
     ($err:expr) => {
@@ -22,6 +22,12 @@ macro_rules! get_string_or_err {
             None => return Err(format!("Key not present: {}", $key))
         }
     };
+}
+
+macro_rules! err_as_json_string {
+    ($err:expr) => {
+        Err(format!("{{\"error\":\"{}\"}}", $err.description()))
+    }
 }
 
 fn get_team(client: Client, team: &str) -> Result<Cursor, String> {
@@ -44,49 +50,38 @@ fn get_team(client: Client, team: &str) -> Result<Cursor, String> {
     }
 }
 
-fn get_player_string(player: Document) -> Result<(String, String), String> {
-    let name = match (player.get("first_name"), player.get("last_name")) {
-        (Some(&Bson::String(ref first)), Some(&Bson::String(ref last))) =>
-            format!("{} {}", first, last),
-        _ => return Err("Unable to parse name from document".to_owned())
-    };
-
-    let pos_abbrev = get_string_or_err!(player, "position");
-
-    let position = match pos_abbrev.as_ref() {
-        "P" => "Pitcher",
-        "C" => "Catcher",
-        "IF" => "Infielder",
-        "OF" => "Outfielder",
-        _ => return Err(format!("Invalid position: {}", pos_abbrev).to_owned())
-    };
-
-    Ok((name, position.to_owned()))
+fn json_string_from_doc_result(result: MongoResult<Document>) -> Result<String, String> {
+    match result {
+        Ok(doc) => Ok(format!("{}", Bson::Document(doc).to_json())),
+        Err(e) => err_as_json_string!(e)
+    }
 }
 
-fn get_team_string(team: &str, cursor: Cursor) -> Result<String, String> {
-    let team_name = match team::get_full_team_name(team) {
-        Some(name) => name,
-        None => return Err(format!("Invalid team: {}", team).to_owned())
-    };
+fn get_json_string(client: Client, team: &str) -> String {
+    match get_team(client, team) {
+        Ok(cursor) => {
+            let mut string = "[".to_owned();
 
-    let mut string = format!("<h2>{}</h2><h3><a href=\"/\">Go back</a><h3><table>", team_name);
+            for (i, doc_result) in cursor.enumerate() {
+                match json_string_from_doc_result(doc_result) {
+                    Ok(json_string) => {
+                        let new_string = if i == 0 {
+                            json_string
+                        } else {
+                            format!(",{}", json_string)
+                        };
 
-    for player_result in cursor {
-        let player = match player_result {
-            Ok(doc) => doc,
-            Err(e) => return err_as_string!(e)
-        };
+                        string.push_str(&new_string);
+                    },
+                    Err(e) => return e
+                }
+            }
 
-        let (name, position) = match get_player_string(player) {
-            Ok((name, pos)) => (name, pos),
-            Err(_error) => continue
-        };
-
-        string.push_str(&format!("<tr><td>{}</td><td>{}</td></tr>", name, position));
+            string.push_str("]");
+            string
+        },
+        Err(e) => e
     }
-
-    Ok(string + "</table>")
 }
 
 pub fn handle_team(client: Client, context: Context, response: Response) {
@@ -95,60 +90,7 @@ pub fn handle_team(client: Client, context: Context, response: Response) {
         None => "BOS"
     };
 
-    let string = match get_team(client, team) {
-        Ok(cursor) => match get_team_string(team, cursor) {
-            Ok(s) => s,
-            Err(s) => s
-        },
-        Err(e) => e
-    };
+    let string = get_json_string(client, team);
 
     response.into_writer().send(string);
-}
-
-pub fn select_team(_client: Client, _context: Context, response: Response) {
-    let mut string = "<select id=\"team\">\n".to_owned();
-
-    for team in team::ALL_TEAMS.iter() {
-        let full_name = match team::get_full_team_name(team) {
-            Some(name) => name,
-            None => continue
-        };
-
-        string.push_str(&format!("  <option value=\"{}\">{}</option>\n", team, full_name));
-    }
-
-    string.push_str("  </select>\n<br>\n<button onClick=\"\n  \
-                       (function() {\n    \
-                           var e = document.getElementById('team');\n    \
-                           var team = '/' + e.options[e.selectedIndex].value;\n    \
-                           window.location.href=team;\n  \
-                       })()\">Select Team</button>");
-
-    response.into_writer().send(string);
-}
-
-pub fn get_high_average_counts(client: Client) -> Result<Cursor, String> {
-    /*
-    { $match: { position: { $ne: "P" }, avg: { $gte: 0.3 } } },
-    { $group: { _id: "$team" , count: { $sum: 1 } } },
-    { $sort: { count: -1, _id: -1 } }
-    */
-
-    let db = client.db("mlb");
-    let coll = db.collection("players");
-    let pipeline = vec![
-        doc! {
-            "position" => { "$ne" => "P" },
-            "avg" => { "$gte" => 0.3 }
-        },
-        doc! {
-            "$group" => { "_id" => "$team", "count" => { "$sum" => 1 } }
-        },
-        doc! {
-            "$sort" => { "count" => -1, "_id" => -1 }
-        }
-    ];
-
-    let
 }

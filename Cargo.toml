@@ -5,6 +5,7 @@ authors = ["Saghm Rossi <saghmrossi@gmail.com>"]
 
 [dependencies]
 rustful = "0.2.2"
+rustc-serialize = "0.3.15"
 
 [dependencies.bson]
 git = "https://github.com/zonyitoo/bson-rs"
