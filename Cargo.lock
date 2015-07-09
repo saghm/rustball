@@ -1,5 +1,5 @@
 [root]
-name = "rest-api"
+name = "rustball"
 version = "0.1.0"
 dependencies = [
  "bson 0.1.2 (git+https://github.com/zonyitoo/bson-rs)",
