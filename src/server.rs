@@ -30,6 +30,16 @@ macro_rules! json_string_from_doc {
     };
 }
 
+macro_rules! find {
+    ($client:expr, $filter:expr, $options:expr, $response:expr) => {{
+        let db = $client.db("mlb");
+        let coll = db.collection("players");
+        let result = coll.find($filter, Some($options));
+        let string = get_json_string(result);
+        respond!($response, string)
+    }};
+}
+
 fn json_string_from_doc_result(result: MongoResult<Document>) -> Result<String, String> {
     match result {
         Ok(doc) => Ok(json_string_from_doc!(doc)),
@@ -70,30 +80,66 @@ fn get_json_string(result: MongoResult<Cursor>) -> String {
     }
 }
 
-fn get_team(client: Client, team: &str) -> String {
-    let db = client.db("mlb");
-    let coll = db.collection("players");
-
-    let filter = Some(doc! { "team" => (team) });
-
-    let mut options = FindOptions::new();
-    options.projection = Some(doc! {
-        "_id" => (0),
-        "first_name" => (1),
-        "last_name" => (1),
-        "position" => (1)
-    });
-
-    let result = coll.find(filter, Some(options));
-    get_json_string(result)
-}
-
 pub fn team(client: Client, context: Context, response: Response) {
     let team = match context.variables.get("team") {
         Some(team_name) => &team_name[..],
         None => return respond_with_json_err!(response, "No team specified")
     };
 
-    let string = get_team(client, team);
-    respond!(response, string);
+    let filter = Some(doc! {
+        "team" => team
+    });
+
+    let mut options = FindOptions::new();
+
+    options.projection = Some(doc! {
+        "_id" => 0,
+        "first_name" => 1,
+        "last_name" => 1,
+        "position" => 1
+    });
+
+    options.sort = Some(doc! {
+        "position" => 1,
+        "last_name" => 1,
+        "first_name" => 1
+    });
+
+    find!(client, filter, options, response)
+}
+
+fn averages(high: bool, client: Client, response: Response) {
+    let filter = Some(doc! {
+        "avg" => { "$ne" => (Bson::Null) }
+    });
+
+    let mut options = FindOptions::new();
+    options.limit = 20;
+
+    options.projection = Some(doc! {
+        "_id" => 0,
+        "first_name" => 1,
+        "last_name" => 1,
+        "team" => 1,
+        "avg" => 1
+    });
+
+    let avg_sort = if high { -1 } else { 1 };
+
+    options.sort = Some(doc! {
+        "avg" => avg_sort,
+        "team" => 1,
+        "last_name" => 1,
+        "first_name" => 1
+    });
+
+    find!(client, filter, options, response)
+}
+
+pub fn highest_averages(client: Client, _context: Context, response: Response) {
+    averages(true, client, response)
+}
+
+pub fn lowest_averages(client: Client, _context: Context, response: Response) {
+    averages(false, client, response)
 }

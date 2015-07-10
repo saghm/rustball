@@ -28,8 +28,11 @@ fn main() {
     let server = Server {
         host: (Ipv4Addr::new(127, 0, 0, 1), 3000).into(),
         content_type: content_type!(Application / Json; Charset = Utf8),
+        fallback_handler: None,
         handlers: insert_routes! {
             TreeRouter::new() => {
+                "/averages/high" => Get: route!(highest_averages),
+                "/averages/low" => Get: route!(lowest_averages),
                 "/team/:team" => Get: route!(team)
             }
         },
