@@ -2,17 +2,11 @@ use std::error::Error;
 
 use bson::{Bson, Document};
 use mongodb::{Client, ThreadedClient};
-use mongodb::coll::options::FindOptions;
 use mongodb::cursor::Cursor;
 use mongodb::db::ThreadedDatabase;
 use mongodb::error::Result as MongoResult;
+use rustc_serialize::json::Json;
 use rustful::{Context, Response};
-
-macro_rules! err_as_string {
-    ($err:expr) => {
-        Err($err.description().to_owned())
-    };
-}
 
 macro_rules! get_string_or_err {
     ($doc:expr, $key:expr) => {
@@ -26,41 +20,33 @@ macro_rules! get_string_or_err {
 
 macro_rules! err_as_json_string {
     ($err:expr) => {
-        Err(format!("{{\"error\":\"{}\"}}", $err.description()))
+        format!("{{\"error\":\"{}\"}}", $err.description())
     }
 }
 
-fn get_team(client: Client, team: &str) -> Result<Cursor, String> {
-    let db = client.db("mlb");
-    let coll = db.collection("players");
-
-    let filter = Some(doc! { "team" => (team) });
-
-    let mut options = FindOptions::new();
-    options.projection = Some(doc! {
-        "_id" => (0),
-        "first_name" => (1),
-        "last_name" => (1),
-        "position" => (1)
-    });
-
-    match coll.find(filter, Some(options)) {
-        Ok(cursor) => Ok(cursor),
-        Err(e) => err_as_string!(e)
+macro_rules! respond {
+    ($response:expr, $string:expr) => {
+        $response.into_writer().send($string)
     }
+}
+
+macro_rules! respond_with_json_err {
+    ($response:expr, $err:expr) => {
+        respond!($response, format!("{{\"error\":\"{}\"}}", $err))
+    };
 }
 
 fn json_string_from_doc_result(result: MongoResult<Document>) -> Result<String, String> {
     match result {
         Ok(doc) => Ok(format!("{}", Bson::Document(doc).to_json())),
-        Err(e) => err_as_json_string!(e)
+        Err(e) => Err(err_as_json_string!(e))
     }
 }
 
-fn get_json_string(client: Client, team: &str) -> String {
-    match get_team(client, team) {
+fn get_json_string(result: MongoResult<Cursor>) -> String {
+    match result {
         Ok(cursor) => {
-            let mut string = "[".to_owned();
+            let mut string = "{\"result\":[".to_owned();
 
             for (i, doc_result) in cursor.enumerate() {
                 match json_string_from_doc_result(doc_result) {
@@ -77,20 +63,36 @@ fn get_json_string(client: Client, team: &str) -> String {
                 }
             }
 
-            string.push_str("]");
+            string.push_str("]}");
             string
         },
-        Err(e) => e
+        Err(e) => err_as_json_string!(e)
     }
 }
 
-pub fn handle_team(client: Client, context: Context, response: Response) {
-    let team = match context.variables.get("team") {
-        Some(team_name) => &team_name[..],
-        None => "BOS"
+pub fn handle_find(client: Client, context: Context, response: Response) {
+    let filter = match context.query.get("filter") {
+        Some(json_string) => &json_string[..],
+        None => "{}"
     };
 
-    let string = get_json_string(client, team);
+    let json = match Json::from_str(filter) {
+        Ok(val) => val,
+        Err(e) => {
+            return respond_with_json_err!(response, e)
+        }
+    };
 
-    response.into_writer().send(string);
+    let bson = Bson::from_json(&json);
+    let doc = match bson {
+        Bson::Document(doc) => doc,
+        _ => return respond_with_json_err!(response, "JSON value should be object")
+    };
+
+    let db = client.db("mlb");
+    let coll = db.collection("players");
+
+    let result = coll.find(Some(doc), None);
+
+    respond!(response, get_json_string(result))
 }

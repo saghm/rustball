@@ -21,4 +21,8 @@ Usage
 
 ### API endpoints
 
--	`/find/:team` - e.g. `/find/BOS` for the Red Sox, `find/KC` for the Royals
+-	`/find/`
+	-	GET
+	-	Params
+		-	`filter`: JSON document
+	-	Responds with the results of a `find` query using `filter`
