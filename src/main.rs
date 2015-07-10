@@ -24,7 +24,7 @@ fn main() {
         content_type: content_type!(Application / Json; Charset = Utf8),
         handlers: insert_routes! {
             TreeRouter::new() => {
-                "/find/" => Get: find_handler
+                "/find" => Get: find_handler
             }
         },
 

@@ -21,7 +21,7 @@ Usage
 
 ### API endpoints
 
--	`/find/`
+-	`/find`
 	-	GET
 	-	Params
 		-	`filter`: JSON document
