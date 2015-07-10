@@ -17,14 +17,16 @@ use rustful::{Server, TreeRouter};
 
 fn main() {
     let client = Client::connect("localhost", 27017).unwrap();
-    let find_handler = RequestHandler::new(client.clone(), server::handle_find);
+    let find = RequestHandler::new(client.clone(), server::find);
+    let find_one = RequestHandler::new(client.clone(), server::find_one);
 
     let server = Server {
         host: (Ipv4Addr::new(127, 0, 0, 1), 3000).into(),
         content_type: content_type!(Application / Json; Charset = Utf8),
         handlers: insert_routes! {
             TreeRouter::new() => {
-                "/find" => Get: find_handler
+                "/find" => Get: find,
+                "/find_one" => Get: find_one
             }
         },
 

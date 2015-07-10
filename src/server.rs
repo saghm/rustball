@@ -36,9 +36,15 @@ macro_rules! respond_with_json_err {
     };
 }
 
+macro_rules! json_string_from_doc {
+    ($doc:expr) => {
+        format!("{}", Bson::Document($doc).to_json())
+    };
+}
+
 fn json_string_from_doc_result(result: MongoResult<Document>) -> Result<String, String> {
     match result {
-        Ok(doc) => Ok(format!("{}", Bson::Document(doc).to_json())),
+        Ok(doc) => Ok(json_string_from_doc!(doc)),
         Err(e) => Err(err_as_json_string!(e))
     }
 }
@@ -70,7 +76,7 @@ fn get_json_string(result: MongoResult<Cursor>) -> String {
     }
 }
 
-pub fn handle_find(client: Client, context: Context, response: Response) {
+pub fn find(client: Client, context: Context, response: Response) {
     let filter = match context.query.get("filter") {
         Some(json_string) => &json_string[..],
         None => "{}"
@@ -95,4 +101,40 @@ pub fn handle_find(client: Client, context: Context, response: Response) {
     let result = coll.find(Some(doc), None);
 
     respond!(response, get_json_string(result))
+}
+
+pub fn find_one(client: Client, context: Context, response: Response) {
+    let filter = match context.query.get("filter") {
+        Some(json_string) => &json_string[..],
+        None => "{}"
+    };
+
+    let json = match Json::from_str(filter) {
+        Ok(val) => val,
+        Err(e) => {
+            return respond_with_json_err!(response, e)
+        }
+    };
+
+    let bson = Bson::from_json(&json);
+    let doc = match bson {
+        Bson::Document(doc) => doc,
+        _ => return respond_with_json_err!(response, "JSON value should be object")
+    };
+
+    let db = client.db("mlb");
+    let coll = db.collection("players");
+
+    let result = coll.find_one(Some(doc), None);
+    let doc_opt = match result {
+        Ok(option) => option,
+        Err(e) => return respond_with_json_err!(response, e)
+    };
+
+    let string = match doc_opt {
+        Some(doc) => json_string_from_doc!(doc),
+        None => "{}".to_owned()
+    };
+
+    respond!(response, format!("{{ \"result\": {}}}", string))
 }

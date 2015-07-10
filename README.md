@@ -26,3 +26,5 @@ Usage
 	-	Params
 		-	`filter`: JSON document
 	-	Responds with the results of a `find` query using `filter`
+-	`/find_one`
+	-	Same as find, only a max of one document is returned
