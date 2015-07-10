@@ -18,9 +18,15 @@ macro_rules! get_string_or_err {
     };
 }
 
+macro_rules! json_error_string {
+    ($string:expr) => {
+        format!("{{\"error\":\"{}\"}}", $string)
+    }
+}
+
 macro_rules! err_as_json_string {
     ($err:expr) => {
-        format!("{{\"error\":\"{}\"}}", $err.description())
+        json_error_string!($err.description())
     }
 }
 
@@ -76,7 +82,7 @@ fn get_json_string(result: MongoResult<Cursor>) -> String {
     }
 }
 
-pub fn count(client: Client, context: Context, response: Response) {
+fn get_filter(context: &Context) -> Result<Document, String> {
     let filter = match context.query.get("filter") {
         Some(json_string) => &json_string[..],
         None => "{}"
@@ -84,21 +90,27 @@ pub fn count(client: Client, context: Context, response: Response) {
 
     let json = match Json::from_str(filter) {
         Ok(val) => val,
-        Err(e) => {
-            return respond_with_json_err!(response, e)
-        }
+        Err(e) => return Err(err_as_json_string!(e))
     };
 
     let bson = Bson::from_json(&json);
-    let doc = match bson {
-        Bson::Document(doc) => doc,
-        _ => return respond_with_json_err!(response, "JSON value should be object")
+
+    match bson {
+        Bson::Document(doc) => Ok(doc),
+        _ => Err(json_error_string!("JSON value should be object"))
+    }
+}
+
+pub fn count(client: Client, context: Context, response: Response) {
+    let filter = match get_filter(&context) {
+        Ok(doc) => doc,
+        Err(e) => return respond!(response, e)
     };
 
     let db = client.db("mlb");
     let coll = db.collection("players");
 
-    let string = match coll.count(Some(doc), None) {
+    let string = match coll.count(Some(filter), None) {
         Ok(i) => format!("{{ \"result\": {}}}", i),
         Err(e) => err_as_json_string!(e)
     };
@@ -134,28 +146,15 @@ pub fn find(client: Client, context: Context, response: Response) {
 }
 
 pub fn find_one(client: Client, context: Context, response: Response) {
-    let filter = match context.query.get("filter") {
-        Some(json_string) => &json_string[..],
-        None => "{}"
-    };
-
-    let json = match Json::from_str(filter) {
-        Ok(val) => val,
-        Err(e) => {
-            return respond_with_json_err!(response, e)
-        }
-    };
-
-    let bson = Bson::from_json(&json);
-    let doc = match bson {
-        Bson::Document(doc) => doc,
-        _ => return respond_with_json_err!(response, "JSON value should be object")
+    let filter = match get_filter(&context) {
+        Ok(doc) => doc,
+        Err(e) => return respond!(response, e)
     };
 
     let db = client.db("mlb");
     let coll = db.collection("players");
 
-    let result = coll.find_one(Some(doc), None);
+    let result = coll.find_one(Some(filter), None);
     let doc_opt = match result {
         Ok(option) => option,
         Err(e) => return respond_with_json_err!(response, e)
