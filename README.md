@@ -21,4 +21,16 @@ Usage
 
 ### API endpoints
 
--	`/team/:team` - e.g. `/team/BOS` for the Red Sox, `team/KC` for the Royals
+-	`/team/:team`
+	-	Type: GET
+	-	Response: list of players on the team
+	-	Examples
+		-	`/team/BOS`
+		-	`/team/PHI`
+		-	`/team/KC`
+-	`/averages/high`
+	-	Type: GET
+	-	Response: list of top 20 hitters by average
+-	`/averages/low`
+	-	Type: GET
+	-	Response: list of bottom 20 hitters by average
