@@ -21,12 +21,4 @@ Usage
 
 ### API endpoints
 
--	`/find`
-	-	GET
-	-	Params
-		-	`filter`: JSON document
-	-	Responds with the results of a `find` query using `filter`
--	`/find_one`
-	-	Same as find, only a max of one document is returned
--	`/count`
-	-	Same as find, only the number of documents is returned rather than the documents themselves
+-	`/team/:team` - e.g. `/team/BOS` for the Red Sox, `team/KC` for the Royals
