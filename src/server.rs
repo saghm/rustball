@@ -143,3 +143,52 @@ pub fn highest_averages(client: Client, _context: Context, response: Response) {
 pub fn lowest_averages(client: Client, _context: Context, response: Response) {
     averages(false, client, response)
 }
+
+pub fn team_bats(client: Client, _context: Context, response: Response) {
+    let pipeline = vec![
+        doc! { "$match" => { "position" => { "$ne" => "P" } } },
+        doc! {
+            "$project" => {
+                "_id" => 0,
+                "team" => 1,
+                "bats" => 1,
+                "player" => {
+                    "first_name" => "$first_name",
+                    "last_name" => "$last_name"
+                }
+            }
+        },
+        doc! {
+            "$group" => {
+                "_id" => "$team",
+                "L" => {
+                    "$addToSet" => {
+                        "$cond" => [
+                            { "$eq" => [ "$bats", "L" ] },
+                            "$player",
+                            (Bson ::Null)
+                        ]
+                    }
+                },
+                "R" => {
+                    "$addToSet" => {
+                        "$cond" => [ { "$eq" => [ "$bats", "R" ] }, "$player", (Bson::Null)]
+                    }
+                }
+            }
+        },
+        doc! {
+            "$project" => {
+                "L" => { "$setDifference" => ["$L", [Bson::Null]] },
+                "R" => { "$setDifference" => ["$R", [Bson::Null]] }
+            }
+        }
+    ];
+
+    let db = client.db("mlb");
+    let coll = db.collection("players");
+    let result = coll.aggregate(pipeline, None);
+
+    let string = get_json_string(result);
+    respond!(response, string)
+}

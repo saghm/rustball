@@ -34,3 +34,6 @@ Usage
 -	`/averages/low`
 	-	Type: GET
 	-	Response: list of bottom 20 hitters by average
+-	`/teams/bats`
+	-	Type: GET
+	-	Response: list of teams with left-handed and right-handed batters grouped
