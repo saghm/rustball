@@ -76,6 +76,36 @@ fn get_json_string(result: MongoResult<Cursor>) -> String {
     }
 }
 
+pub fn count(client: Client, context: Context, response: Response) {
+    let filter = match context.query.get("filter") {
+        Some(json_string) => &json_string[..],
+        None => "{}"
+    };
+
+    let json = match Json::from_str(filter) {
+        Ok(val) => val,
+        Err(e) => {
+            return respond_with_json_err!(response, e)
+        }
+    };
+
+    let bson = Bson::from_json(&json);
+    let doc = match bson {
+        Bson::Document(doc) => doc,
+        _ => return respond_with_json_err!(response, "JSON value should be object")
+    };
+
+    let db = client.db("mlb");
+    let coll = db.collection("players");
+
+    let string = match coll.count(Some(doc), None) {
+        Ok(i) => format!("{{ \"result\": {}}}", i),
+        Err(e) => err_as_json_string!(e)
+    };
+
+    respond!(response, string)
+}
+
 pub fn find(client: Client, context: Context, response: Response) {
     let filter = match context.query.get("filter") {
         Some(json_string) => &json_string[..],
