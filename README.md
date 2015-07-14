@@ -19,6 +19,15 @@ Usage
 
 ### API endpoints
 
+-	`/averages/high`
+	-	Type: GET
+	-	Response: list of top 20 hitters by average
+-	`/averages/low`
+	-	Type: GET
+	-	Response: list of bottom 20 hitters by average
+-	`/teams/batters`
+	-	Type: GET
+	-	Response: list of teams with left-handed and right-handed batters grouped
 -	`/team/:team`
 	-	Type: GET
 	-	Response: list of players on the team
@@ -26,12 +35,3 @@ Usage
 		-	`/team/BOS`
 		-	`/team/PHI`
 		-	`/team/KC`
--	`/averages/high`
-	-	Type: GET
-	-	Response: list of top 20 hitters by average
--	`/averages/low`
-	-	Type: GET
-	-	Response: list of bottom 20 hitters by average
--	`/teams/bats`
-	-	Type: GET
-	-	Response: list of teams with left-handed and right-handed batters grouped
