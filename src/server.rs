@@ -116,6 +116,53 @@ pub fn lowest_averages(client: Client, _context: Context, response: Response) {
     averages(false, client, response)
 }
 
+pub fn player_tags(client: Client, context: Context, response: Response) {
+    let first_name = match context.query.get("first_name") {
+        Some(name) => &name[..],
+        None => return respond_with_json_err!(response, "No first name specified")
+    };
+
+    let last_name = match context.query.get("last_name") {
+        Some(name) => &name[..],
+        None => return respond_with_json_err!(response, "No last name specified")
+    };
+
+    let team = match context.query.get("team") {
+        Some(abbrev) => &abbrev[..],
+        None => return respond_with_json_err!(response, "No team specified")
+    };
+
+    let filter = Some(doc! {
+        "first_name" => first_name,
+        "last_name" => last_name,
+        "team" => team
+    });
+
+    let mut options = FindOptions::new();
+    options.projection = Some(doc!{
+        "_id" => 0,
+        "first_name" => 1,
+        "last_name" => 1,
+        "position" => 1,
+        "team" => 1,
+        "tags" => 1
+    });
+
+    let db = client.db("mlb");
+    let coll = db.collection("players");
+    let result = coll.find_one(filter, Some(options));
+    let doc_opt = match result {
+        Ok(opt) => opt,
+        Err(e) => return respond!(response, json_error_string!(e))
+    };
+
+    let string = match doc_opt {
+        Some(doc) => format!("{}", Bson::Document(doc).to_json()),
+        None => "{}".to_owned()
+    };
+    respond!(response, string)
+}
+
 pub fn team_batters(client: Client, _context: Context, response: Response) {
     let pipeline = vec![
         doc! { "$match" => { "position" => { "$ne" => "P" } } },

@@ -24,7 +24,6 @@ fn main() {
         };
     }
 
-
     let server = Server {
         host: (Ipv4Addr::new(127, 0, 0, 1), 3000).into(),
         content_type: content_type!(Application / Json; Charset = Utf8),
@@ -34,6 +33,7 @@ fn main() {
                 "/averages/high" => Get: route!(highest_averages),
                 "/averages/low" => Get: route!(lowest_averages),
                 "/teams/batters" => Get: route!(team_batters),
+                "/tags/player" => Get: route!(player_tags),
                 "/teams/:team" => Get: route!(team)
             }
         },

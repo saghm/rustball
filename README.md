@@ -25,6 +25,13 @@ Usage
 -	`/averages/low`
 	-	Type: GET
 	-	Response: list of bottom 20 hitters by average
+-	`/tags/player`
+	-	Type: GET
+	-	Query string (required)
+		-	`first_name`
+		-	`last_name`
+		-	`team`
+	-	Response: Single document with the player's info and tags
 -	`/teams/batters`
 	-	Type: GET
 	-	Response: list of teams with left-handed and right-handed batters grouped
