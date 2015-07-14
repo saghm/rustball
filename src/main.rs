@@ -33,7 +33,7 @@ fn main() {
                 "/averages/high" => Get: route!(highest_averages),
                 "/averages/low" => Get: route!(lowest_averages),
                 "/teams/batters" => Get: route!(team_batters),
-                "/tags/player" => Get: route!(player_tags),
+                "/tags/player/:id" => Get: route!(player_tags),
                 "/teams/:team" => Get: route!(team)
             }
         },

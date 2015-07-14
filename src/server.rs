@@ -1,4 +1,5 @@
 use bson::{Bson, Document};
+use bson::oid::ObjectId;
 use mongodb::{Client, ThreadedClient};
 use mongodb::cursor::Cursor;
 use mongodb::db::ThreadedDatabase;
@@ -38,6 +39,22 @@ macro_rules! find {
         let string = get_json_string(result);
         respond!($response, string)
     }};
+}
+
+macro_rules! get_id {
+    ($context:expr, $response:expr) => {{
+        let id_str = match $context.variables.get("id") {
+            Some(name) => &name[..],
+            None => return respond_with_json_err!($response, "No id specified")
+        };
+
+        let id = match ObjectId::with_string(id_str) {
+            Ok(oid) => oid,
+            Err(e) => return respond_with_json_err!($response, e)
+        };
+
+        id
+    }}
 }
 
 fn json_string_from_doc_result(result: MongoResult<Document>) -> Result<String, String> {
@@ -89,7 +106,6 @@ fn averages(high: bool, client: Client, response: Response) {
     options.limit = 20;
 
     options.projection = Some(doc! {
-        "_id" => 0,
         "first_name" => 1,
         "last_name" => 1,
         "team" => 1,
@@ -117,30 +133,11 @@ pub fn lowest_averages(client: Client, _context: Context, response: Response) {
 }
 
 pub fn player_tags(client: Client, context: Context, response: Response) {
-    let first_name = match context.query.get("first_name") {
-        Some(name) => &name[..],
-        None => return respond_with_json_err!(response, "No first name specified")
-    };
-
-    let last_name = match context.query.get("last_name") {
-        Some(name) => &name[..],
-        None => return respond_with_json_err!(response, "No last name specified")
-    };
-
-    let team = match context.query.get("team") {
-        Some(abbrev) => &abbrev[..],
-        None => return respond_with_json_err!(response, "No team specified")
-    };
-
-    let filter = Some(doc! {
-        "first_name" => first_name,
-        "last_name" => last_name,
-        "team" => team
-    });
+    let id = get_id!(context, response);
+    let filter = Some(doc! { "_id" => id });
 
     let mut options = FindOptions::new();
     options.projection = Some(doc!{
-        "_id" => 0,
         "first_name" => 1,
         "last_name" => 1,
         "position" => 1,
@@ -157,7 +154,7 @@ pub fn player_tags(client: Client, context: Context, response: Response) {
     };
 
     let string = match doc_opt {
-        Some(doc) => format!("{}", Bson::Document(doc).to_json()),
+        Some(doc) => format!("{{\"result\":{}}}", Bson::Document(doc).to_json()),
         None => "{}".to_owned()
     };
     respond!(response, string)
@@ -168,10 +165,10 @@ pub fn team_batters(client: Client, _context: Context, response: Response) {
         doc! { "$match" => { "position" => { "$ne" => "P" } } },
         doc! {
             "$project" => {
-                "_id" => 0,
                 "team" => 1,
                 "bats" => 1,
                 "player" => {
+                    "_id" => "$_id",
                     "first_name" => "$first_name",
                     "last_name" => "$last_name"
                 }
@@ -225,7 +222,6 @@ pub fn team(client: Client, context: Context, response: Response) {
     let mut options = FindOptions::new();
 
     options.projection = Some(doc! {
-        "_id" => 0,
         "first_name" => 1,
         "last_name" => 1,
         "position" => 1

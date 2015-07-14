@@ -25,12 +25,8 @@ Usage
 -	`/averages/low`
 	-	Type: GET
 	-	Response: list of bottom 20 hitters by average
--	`/tags/player`
+-	`/tags/player/:id`
 	-	Type: GET
-	-	Query string (required)
-		-	`first_name`
-		-	`last_name`
-		-	`team`
 	-	Response: Single document with the player's info and tags
 -	`/teams/batters`
 	-	Type: GET
