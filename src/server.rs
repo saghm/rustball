@@ -80,34 +80,6 @@ fn get_json_string(result: MongoResult<Cursor>) -> String {
     }
 }
 
-pub fn team(client: Client, context: Context, response: Response) {
-    let team = match context.variables.get("team") {
-        Some(team_name) => &team_name[..],
-        None => return respond_with_json_err!(response, "No team specified")
-    };
-
-    let filter = Some(doc! {
-        "team" => team
-    });
-
-    let mut options = FindOptions::new();
-
-    options.projection = Some(doc! {
-        "_id" => 0,
-        "first_name" => 1,
-        "last_name" => 1,
-        "position" => 1
-    });
-
-    options.sort = Some(doc! {
-        "position" => 1,
-        "last_name" => 1,
-        "first_name" => 1
-    });
-
-    find!(client, filter, options, response)
-}
-
 fn averages(high: bool, client: Client, response: Response) {
     let filter = Some(doc! {
         "avg" => { "$ne" => (Bson::Null) }
@@ -144,7 +116,7 @@ pub fn lowest_averages(client: Client, _context: Context, response: Response) {
     averages(false, client, response)
 }
 
-pub fn team_bats(client: Client, _context: Context, response: Response) {
+pub fn team_batters(client: Client, _context: Context, response: Response) {
     let pipeline = vec![
         doc! { "$match" => { "position" => { "$ne" => "P" } } },
         doc! {
@@ -191,4 +163,32 @@ pub fn team_bats(client: Client, _context: Context, response: Response) {
 
     let string = get_json_string(result);
     respond!(response, string)
+}
+
+pub fn team(client: Client, context: Context, response: Response) {
+    let team = match context.variables.get("team") {
+        Some(team_name) => &team_name[..],
+        None => return respond_with_json_err!(response, "No team specified")
+    };
+
+    let filter = Some(doc! {
+        "team" => team
+    });
+
+    let mut options = FindOptions::new();
+
+    options.projection = Some(doc! {
+        "_id" => 0,
+        "first_name" => 1,
+        "last_name" => 1,
+        "position" => 1
+    });
+
+    options.sort = Some(doc! {
+        "position" => 1,
+        "last_name" => 1,
+        "first_name" => 1
+    });
+
+    find!(client, filter, options, response)
 }
