@@ -28,7 +28,7 @@ Usage
 -	`/teams/batters`
 	-	Type: GET
 	-	Response: list of teams with left-handed and right-handed batters grouped
--	`/team/:team`
+-	`/teams/:team`
 	-	Type: GET
 	-	Response: list of players on the team
 	-	Examples
