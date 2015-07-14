@@ -6,6 +6,7 @@ use mongodb::db::ThreadedDatabase;
 use mongodb::coll::options::FindOptions;
 use mongodb::error::Result as MongoResult;
 use rustful::{Context, Response};
+use rustful::context::ExtQueryBody;
 
 macro_rules! json_error_string {
     ($string:expr) => {
@@ -207,6 +208,30 @@ pub fn team_batters(client: Client, _context: Context, response: Response) {
 
     let string = get_json_string(result);
     respond!(response, string)
+}
+
+pub fn add_tag(client: Client, mut context: Context, response: Response) {
+    let id = get_id!(context, response);
+
+    let body = match context.body.read_query_body() {
+        Ok(body) => body,
+        Err(e) => return respond_with_json_err!(response, e)
+    };
+
+    let tag = match body.get("tag") {
+        Some(string) => string.as_ref(),
+        None => return respond_with_json_err!(response, "No tag specified")
+    };
+
+    let filter = doc! { "_id" => id };
+    let update = doc! { "$addToSet" => { "tags" => tag } };
+
+    let db = client.db("mlb");
+    let coll = db.collection("players");
+    match coll.update_one(filter, update, false, None) {
+        Ok(_) => respond!(response, "{\"result\":\"ok\"}"),
+        Err(e) => respond_with_json_err!(response, e)
+    }
 }
 
 pub fn team(client: Client, context: Context, response: Response) {

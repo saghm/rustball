@@ -34,6 +34,7 @@ fn main() {
                 "/averages/low" => Get: route!(lowest_averages),
                 "/teams/batters" => Get: route!(team_batters),
                 "/tags/player/:id" => Get: route!(player_tags),
+                "/tags/player/:id/add" => Post: route!(add_tag),
                 "/teams/:team" => Get: route!(team)
             }
         },
