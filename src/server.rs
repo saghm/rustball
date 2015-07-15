@@ -144,32 +144,17 @@ pub fn lowest_averages(client: Client, _context: Context, response: Response) {
     averages(false, client, response)
 }
 
-pub fn player_tags(client: Client, context: Context, response: Response) {
-    let id = get_id!(context, response);
-    let filter = Some(doc! { "_id" => id });
+pub fn teams(client: Client, _context: Context, response: Response) {
+    let pipeline = vec![
+        doc! {
+            "$group" => { "_id" => 1, "teams" => { "$addToSet" => "$team" } }
+        },
+        doc! {
+            "$project" => { "_id" => 0, "teams" => 1 }
+        }
+    ];
 
-    let mut options = FindOptions::new();
-    options.projection = Some(doc!{
-        "first_name" => 1,
-        "last_name" => 1,
-        "position" => 1,
-        "team" => 1,
-        "tags" => 1
-    });
-
-    let db = client.db("mlb");
-    let coll = db.collection("players");
-    let result = coll.find_one(filter, Some(options));
-    let doc_opt = match result {
-        Ok(opt) => opt,
-        Err(e) => return respond!(response, json_error_string!(e))
-    };
-
-    let string = match doc_opt {
-        Some(doc) => format!("{{\"result\":{}}}", Bson::Document(doc).to_json()),
-        None => "{}".to_owned()
-    };
-    respond!(response, string)
+    aggregate!(client, pipeline, response)
 }
 
 pub fn team_batters(client: Client, _context: Context, response: Response) {
@@ -221,6 +206,34 @@ pub fn team_batters(client: Client, _context: Context, response: Response) {
     respond!(response, string)
 }
 
+pub fn player_tags(client: Client, context: Context, response: Response) {
+    let id = get_id!(context, response);
+    let filter = Some(doc! { "_id" => id });
+
+    let mut options = FindOptions::new();
+    options.projection = Some(doc!{
+        "first_name" => 1,
+        "last_name" => 1,
+        "position" => 1,
+        "team" => 1,
+        "tags" => 1
+    });
+
+    let db = client.db("mlb");
+    let coll = db.collection("players");
+    let result = coll.find_one(filter, Some(options));
+    let doc_opt = match result {
+        Ok(opt) => opt,
+        Err(e) => return respond!(response, json_error_string!(e))
+    };
+
+    let string = match doc_opt {
+        Some(doc) => format!("{{\"result\":{}}}", Bson::Document(doc).to_json()),
+        None => "{}".to_owned()
+    };
+    respond!(response, string)
+}
+
 pub fn add_tag(client: Client, mut context: Context, response: Response) {
     let id = get_id!(context, response);
 
@@ -243,19 +256,6 @@ pub fn add_tag(client: Client, mut context: Context, response: Response) {
         Ok(_) => respond!(response, "{\"result\":\"ok\"}"),
         Err(e) => respond_with_json_err!(response, e)
     }
-}
-
-pub fn teams(client: Client, _context: Context, response: Response) {
-    let pipeline = vec![
-        doc! {
-            "$group" => { "_id" => 1, "teams" => { "$addToSet" => "$team" } }
-        },
-        doc! {
-            "$project" => { "_id" => 0, "teams" => 1 }
-        }
-    ];
-
-    aggregate!(client, pipeline, response)
 }
 
 pub fn team_roster(client: Client, context: Context, response: Response) {
