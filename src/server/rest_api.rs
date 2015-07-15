@@ -16,7 +16,7 @@ macro_rules! json_error_string {
 
 macro_rules! respond {
     ($response:expr, $string:expr) => {
-        $response.into_writer().send($string)
+        $response.send($string)
     }
 }
 
@@ -48,8 +48,23 @@ macro_rules! aggregate {
         let coll = db.collection("players");
         let result = coll.aggregate($pipeline, None);
 
-        let string = get_json_string(result);
-        respond!($response, string)
+        let mut cursor = match result {
+            Ok(cursor) => cursor,
+            Err(e) => return respond_with_json_err!($response, e)
+        };
+
+        let result = match cursor.next() {
+            Some(result) => result,
+            None => return respond_with_json_err!($response, "No documents returned")
+        };
+
+        let doc = match result {
+            Ok(doc) => doc,
+            Err(e) => return respond_with_json_err!($response, e)
+        };
+
+        let json_string = json_string_from_doc!(doc);
+        respond!($response, format!("{{\"result\":{}}}", json_string))
     }};
 }
 

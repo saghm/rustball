@@ -18,9 +18,9 @@ use rustful::{Server, TreeRouter};
 fn main() {
     let client = Client::connect("localhost", 27017).unwrap();
 
-    macro_rules! route {
+    macro_rules! request_route {
         ($func:ident) => {
-            RequestHandler::new(client.clone(), server::$func);
+            RequestHandler::new(client.clone(), server::rest_api::$func);
         };
     }
 
@@ -30,14 +30,14 @@ fn main() {
         fallback_handler: None,
         handlers: insert_routes! {
             TreeRouter::new() => {
-                "/averages/high" => Get: route!(highest_averages),
-                "/averages/low" => Get: route!(lowest_averages),
-                "/players/tag/:tag" => Get: route!(tagged_players),
-                "/teams" => Get: route!(teams),
-                "/teams/batters" => Get: route!(team_batters),
-                "/tags/player/:id" => Get: route!(player_tags),
-                "/tags/player/:id/add" => Post: route!(add_tag),
-                "/teams/:team" => Get: route!(team_roster)
+                "/rest_api/averages/high" => Get: request_route!(highest_averages),
+                "/rest_api/averages/low" => Get: request_route!(lowest_averages),
+                "/rest_api/players/tag/:tag" => Get: request_route!(tagged_players),
+                "/rest_api/teams" => Get: request_route!(teams),
+                "/rest_api/teams/batters" => Get: request_route!(team_batters),
+                "/rest_api/tags/player/:id" => Get: request_route!(player_tags),
+                "/rest_api/tags/player/:id/add" => Post: request_route!(add_tag),
+                "/rest_api/teams/:team" => Get: request_route!(team_roster),
             }
         },
 
