@@ -25,6 +25,9 @@ Usage
 -	`/averages/low`
 	-	Type: GET
 	-	Response: list of bottom 20 hitters by average
+-	`/players/tag/:tag`
+	-	Type: Get
+	-	Response: list of players who have the given tag
 -	`/tags/player/:id`
 	-	Type: GET
 	-	Response: Single document with the player's info and tags

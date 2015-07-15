@@ -32,6 +32,7 @@ fn main() {
             TreeRouter::new() => {
                 "/averages/high" => Get: route!(highest_averages),
                 "/averages/low" => Get: route!(lowest_averages),
+                "/players/tag/:tag" => Get: route!(tagged_players),
                 "/teams" => Get: route!(teams),
                 "/teams/batters" => Get: route!(team_batters),
                 "/tags/player/:id" => Get: route!(player_tags),

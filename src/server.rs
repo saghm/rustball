@@ -144,6 +144,25 @@ pub fn lowest_averages(client: Client, _context: Context, response: Response) {
     averages(false, client, response)
 }
 
+pub fn tagged_players(client: Client, context: Context, response: Response) {
+    let tag = match context.variables.get("tag") {
+        Some(tag) => &tag[..],
+        None => return respond_with_json_err!(response, "No tag specified")
+    };
+
+    let filter  = Some(doc!{ "tags" => tag });
+    let mut options = FindOptions::new();
+
+    options.projection = Some(doc! {
+        "first_name" => 1,
+        "last_name" => 1,
+        "team" => 1,
+        "position" => 1
+    });
+
+    find!(client, filter, options, response)
+}
+
 pub fn teams(client: Client, _context: Context, response: Response) {
     let pipeline = vec![
         doc! {
