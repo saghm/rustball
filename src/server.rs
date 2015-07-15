@@ -42,6 +42,17 @@ macro_rules! find {
     }};
 }
 
+macro_rules! aggregate {
+    ($client:expr, $pipeline:expr, $response:expr) => {{
+        let db = $client.db("mlb");
+        let coll = db.collection("players");
+        let result = coll.aggregate($pipeline, None);
+
+        let string = get_json_string(result);
+        respond!($response, string)
+    }};
+}
+
 macro_rules! get_id {
     ($context:expr, $response:expr) => {{
         let id_str = match $context.variables.get("id") {
@@ -234,7 +245,20 @@ pub fn add_tag(client: Client, mut context: Context, response: Response) {
     }
 }
 
-pub fn team(client: Client, context: Context, response: Response) {
+pub fn teams(client: Client, _context: Context, response: Response) {
+    let pipeline = vec![
+        doc! {
+            "$group" => { "_id" => 1, "teams" => { "$addToSet" => "$team" } }
+        },
+        doc! {
+            "$project" => { "_id" => 0, "teams" => 1 }
+        }
+    ];
+
+    aggregate!(client, pipeline, response)
+}
+
+pub fn team_roster(client: Client, context: Context, response: Response) {
     let team = match context.variables.get("team") {
         Some(team_name) => &team_name[..],
         None => return respond_with_json_err!(response, "No team specified")

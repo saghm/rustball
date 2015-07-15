@@ -32,6 +32,9 @@ Usage
 	-	Type: POST
 	-	JSON data: "tag" => tag to add to player
 	-	Response: Object specifying success or error
+-	`/teams`
+	-	Type: GET
+	-	Response: List of all teams
 -	`/teams/batters`
 	-	Type: GET
 	-	Response: list of teams with left-handed and right-handed batters grouped
