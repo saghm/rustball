@@ -56,7 +56,7 @@
 
         <div class="move-from-left">
             <br>
-            <div ng-repeat="team in teams" class="batters-team aqua">
+            <div ng-repeat="team in teams" class="batters-team">
                 <div ng-show="full_names[team._id]">
                     <img ng-click="setTeam(team._id)" class="team pointer" ng-src="http://cdn.bleacherreport.net/images/team_logos/50x50/{{full_names[team._id].toLowerCase().split(' ').join('_')}}.png">
                     <span ng-click="setTeam(team._id)" class="lightgreen font-135 pointer">&nbsp;{{ full_names[team._id] }}</span>

@@ -8,7 +8,7 @@ a {
 }
 
 .gold {
-    color: goldenrod;
+    color: darkgoldenrod;
 }
 
 .pink {
@@ -34,8 +34,4 @@ a {
 
 .green {
     color: forestgreen
-}
-
-.aqua {
-    color: aqua;
 }
