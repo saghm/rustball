@@ -22,8 +22,8 @@ fn main() {
     let client = Client::connect("localhost", 27017).unwrap();
 
     macro_rules! page_route {
-        ($func:ident) => {
-            AppHandler::Page(server::page::$func)
+        ($file:ident) => {
+            AppHandler::Page(format!("views/{}.html", stringify!($file)))
         };
     }
 
@@ -36,7 +36,7 @@ fn main() {
     let server = Server {
         host: (Ipv4Addr::new(127, 0, 0, 1), 3000).into(),
         content_type: content_type!(Application / Json; Charset = Utf8),
-        fallback_handler: Some(page_route!(error)),
+        fallback_handler: Some(AppHandler::NotFound),
         handlers: insert_routes! {
             TreeRouter::new() => {
                 // Pages
@@ -60,7 +60,7 @@ fn main() {
                 "/rest_api/team/:team/name" => Get: request_route!(team_name),
 
                 // Static
-                "/static/:file" => Get: page_route!(static_file)
+                "/static/css/:file" => Get: AppHandler::Css
             }
         },
 

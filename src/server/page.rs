@@ -21,37 +21,12 @@ macro_rules! set_content_type {
     };
 }
 
-pub fn averages(_context: Context, mut response: Response) {
+pub fn render_html(file: &str, mut response: Response) {
     set_content_type!(response, Text / Html);
-    render_file!("views/averages.html", response)
+    render_file!(file, response)
 }
 
-pub fn batters(_context: Context, mut response: Response) {
-    set_content_type!(response, Text / Html);
-    render_file!("views/batters.html", response);
-}
-
-pub fn player(_context: Context, mut response: Response) {
-    set_content_type!(response, Text / Html);
-    render_file!("views/player.html", response)
-}
-
-pub fn league(_context: Context, mut response: Response) {
-    set_content_type!(response, Text / Html);
-    render_file!("views/league.html", response)
-}
-
-pub fn tags(_context: Context, mut response: Response) {
-    set_content_type!(response, Text / Html);
-    render_file!("views/tags.html", response)
-}
-
-pub fn team(_context: Context, mut response: Response) {
-    set_content_type!(response, Text / Html);
-    render_file!("views/team.html", response)
-}
-
-pub fn static_file(context: Context, mut response: Response) {
+pub fn render_css(context: Context, mut response: Response) {
     match context.variables.get("file") {
         Some(file) => {
             set_content_type!(response, Text / Css);
@@ -59,12 +34,12 @@ pub fn static_file(context: Context, mut response: Response) {
         },
         None => {
             set_content_type!(response, Text / Plain);
-            response.send("File not found")
+            response.send("No file specified")
         }
     }
 }
 
-pub fn error(_context: Context, mut response: Response) {
+pub fn not_found(mut response: Response) {
     response.set_status(StatusCode::NotFound);
     set_content_type!(response, Text / Html);
     response.send("<img src=\"http://cf.chucklesnetwork.com/items/3/8/5/8/3/original/i-dont-always-crash-error-404-but-when-i-do-not-found.jpg\">")
