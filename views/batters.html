@@ -1,0 +1,106 @@
+<!doctype html>
+<html ng-app="battersView">
+<head>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+    <script type="text/javascript">
+    var app = angular.module('battersView', []);
+
+    app.controller('BattersViewController', function($scope, $http) {
+        function getTeamNameForLink(team) {
+            $http.get('/rest_api/team/' + team + '/name').success(function(data) {
+                $scope.full_names[team] = data.result;
+                return data.result;
+            });
+        };
+
+        $scope.setTeam = function(team) {
+            if ($scope.show === team) {
+                $scope.show = '';
+                return;
+            }
+
+            $scope.show = team;
+        }
+
+        $http.get('/rest_api/batters').success(function(data) {
+            $scope.teams = data.result;
+            $scope.full_names = {};
+            $scope.show = '';
+
+            for (var i = 0; i < data.result.length; i++) {
+                getTeamNameForLink(data.result[i]._id);
+            }
+        });
+    });
+    </script>
+</head>
+
+<body>
+    <div ng-controller="BattersViewController">
+        <div class="top move-from-left header">
+            <div>
+                <a href="/league/" class="bv">All teams</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="/averages/high/" class="bv">Best hitters</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="/averages/low/" class="bv">Worst hitters</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="/tags/" class="bv">Tags</a>
+                &nbsp;&nbsp;&nbsp;
+                <span class="brick">Batters by team</span>
+            </div>
+        </div>
+
+        <div class="move-from-left">
+            <br>
+            <div ng-repeat="team in teams" class="batters-team aqua">
+                <div ng-show="full_names[team._id]">
+                    <img ng-click="setTeam(team._id)" class="team pointer" ng-src="http://cdn.bleacherreport.net/images/team_logos/50x50/{{full_names[team._id].toLowerCase().split(' ').join('_')}}.png">
+                    <span ng-click="setTeam(team._id)" class="font-135 pointer">&nbsp;{{ full_names[team._id] }}</span>
+
+                    <div ng-show="show === team._id">
+                        <ul>
+                            <li>
+                                <span class="font-135 pink">Left-handed hitters</span>
+
+                                <ul>
+                                    <div ng-repeat="player in team.L">
+                                        <li class="font-08">
+                                            <a ng-href="/player/{{player._id}}/">{{ player.first_name }} {{ player.last_name }}</a>
+                                        </li>
+                                    </div>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <span class="font-135 pink">Right-handed hitters</span>
+
+                                <ul>
+                                    <div ng-repeat="player in team.R">
+                                        <li class="font-08">
+                                            <a ng-href="/player/{{player._id}}/">{{ player.first_name }} {{ player.last_name }}</a>
+                                        </li>
+                                    </div>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <span class="font-135 pink">Switch hitters</span>
+
+                                <ul>
+                                    <div ng-repeat="player in team.B">
+                                        <li class="font-08">
+                                            <a ng-href="/player/{{player._id}}/">{{ player.first_name }} {{ player.last_name }}</a>
+                                        </li>
+                                    </div>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

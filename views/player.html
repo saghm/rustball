@@ -1,0 +1,90 @@
+<!doctype html>
+<html ng-app="playerView">
+<head>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+    <script type="text/javascript">
+    var app = angular.module('playerView', []);
+
+    app.controller('PlayerViewController', function($scope, $http) {
+        $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
+
+        var path = window.location.pathname;
+
+        if (path.charAt(path.length - 1) === '/') {
+            path = path.slice(1, path.length - 1);
+        }
+
+        var id = path.substring(path.lastIndexOf('/'));
+
+        $scope.addTag = function() {
+            var tag = document.getElementById('new_tag').value.trim();
+
+            if (tag === "") {
+                return;
+            }
+
+            $http.post('/rest_api/player' + id + '/add_tag', 'tag=' + tag).success(function() {
+                location.reload();
+            });
+        }
+
+        $http.get('/rest_api/player' + id).success(function(data) {
+            $scope.player = data.result;
+
+            $http.get('/rest_api/team/' + data.result.team + '/name').success(function(data) {
+                $scope.team_name = data.result;
+            });
+        });
+    });
+    </script>
+</head>
+
+<body>
+    <div ng-controller="PlayerViewController">
+        <div class="top move-from-left header">
+            <a href="/league/" class="bv">All teams</a>
+            &nbsp;&nbsp;&nbsp;
+            <a href="/averages/high/" class="bv">Best hitters</a>
+            &nbsp;&nbsp;&nbsp;
+            <a href="/averages/low/" class="bv">Worst hitters</a>
+            &nbsp;&nbsp;&nbsp;
+            <a href="/tags/" class="bv">Tags</a>
+            &nbsp;&nbsp;&nbsp;
+            <a href="/batters/" class="bv">Batters by team</a>
+        </div>
+
+        <div class="move-from-left">
+            <span class="col">
+                <div class="name space-below">{{ player.first_name }} {{ player.last_name }}</div>
+
+                <div class="tag-title pink"><b>Tags</b></div>
+                <div class="tag" ng-repeat="tag in player.tags">
+                    <a ng-href="/tags/{{tag}}/">{{ tag }}</a>
+                </div>
+            </span>
+
+            <span class="col">
+                <div ng-switch="player.position" class="position move-over space-below">
+                    <div ng-switch-when="C">Catcher</div>
+                    <div ng-switch-when="IF">Infield</div>
+                    <div ng-switch-when="OF">Outfield</div>
+                    <div ng-switch-when="P">Pitcher</div>
+                    <div ng-switch-default>{{ player.position }}</div>
+                </div>
+
+                <div class="move-over">
+                    <input id="new_tag" class="round" type="text" placeholder="Input a tag">
+                    <button id="add_tag" class="round" ng-click="addTag()">Add tag</button>
+                </div>
+            </span>
+
+            <span class="last-col">
+                <a ng-href="/team/{{player.team}}/">
+                    <img ng-src="http://cdn.bleacherreport.net/images/team_logos/150x150/{{team_name.toLowerCase().split(' ').join('_')}}.png" class="move-logo">
+                </a>
+            </span>
+        </div>
+    </div>
+</body>
+</html>

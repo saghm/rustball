@@ -1,0 +1,95 @@
+<!doctype html>
+<html ng-app="teamView">
+<head>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+    <script type="text/javascript">
+    var app = angular.module('teamView', []);
+
+    app.controller('TeamViewController', function($scope, $http) {
+        var path = window.location.pathname;
+
+        if (path.charAt(path.length - 1) === '/') {
+            path = path.slice(1, path.length - 1);
+        }
+
+        var team = path.substring(path.lastIndexOf('/'));
+
+        $http.get('/rest_api/team' + team).success(function(data) {
+            $scope.team = data.result;
+        });
+
+        $http.get('/rest_api/team' + team + '/name').success(function(data) {
+            $scope.team_name = data.result;
+        });
+    });
+    </script>
+</head>
+
+<body>
+    <div ng-controller="TeamViewController">
+        <div class="top move-from-left header">
+            <div>
+                <a href="/league/" class="bv">All teams</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="/averages/high/" class="bv">Best hitters</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="/averages/low/" class="bv">Worst hitters</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="/tags/" class="bv">Tags</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="/batters/" class="bv">Batters by team</a>
+            </div>
+
+            <img class="team-logo" ng-src="http://cdn.bleacherreport.net/images/team_logos/150x150/{{team_name.toLowerCase().split(' ').join('_')}}.png">
+        </div>
+
+        <div class="move-from-left">
+            <span class="thin-col">
+                <div class="label">Pitchers</div>
+
+                <div ng-repeat="player in team" ng-if="player.position === 'P'">
+                    <a ng-href="/player/{{player._id}}/">
+                        {{ player.first_name }} {{ player.last_name }}
+                    </a>
+                </div>
+                <br>
+            </span>
+
+
+            <span class="thin-col">
+                <div class="label">Catchers</div>
+
+                <div ng-repeat="player in team" ng-if="player.position === 'C'">
+                    <a ng-href="/player/{{player._id}}/">
+                        {{ player.first_name }} {{ player.last_name }}
+                    </a>
+                </div>
+                <br>
+            </span>
+
+            <span class="thin-col">
+                <div class="label">Infielders</div>
+
+                <div ng-repeat="player in team" ng-if="player.position === 'IF'">
+                    <a ng-href="/player/{{player._id}}/">
+                        {{ player.first_name }} {{ player.last_name }}
+                    </a>
+                </div>
+                <br>
+            </span>
+
+            <span class="last-col">
+                <div class="label">Outfielders</div>
+
+                <div ng-repeat="player in team" ng-if="player.position === 'OF'">
+                    <a ng-href="/player/{{player._id}}/">
+                        {{ player.first_name }} {{ player.last_name }}
+                    </a>
+                </div>
+                <br>
+            </span>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!doctype html>
+<html ng-app="leagueView">
+<head>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+    <script type="text/javascript">
+    var app = angular.module('leagueView', []);
+
+    app.controller('LeagueViewController', function($scope, $http) {
+        $http.get('/rest_api/league').success(function(data) {
+            $scope.mlb = data;
+        });
+    });
+    </script>
+</head>
+
+<body>
+    <div class="move-from-left header top">
+        <span class="brick">All teams</span>
+        &nbsp;&nbsp;&nbsp;
+        <a href="/averages/high/" class="bv">Best hitters</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="/averages/low/" class="bv">Worst hitters</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="/tags/" class="bv">Tags</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="/batters/" class="bv">Batters by team</a>
+    </div>
+
+    <div ng-controller="LeagueViewController" id="container">
+        <div class="league-col wide">
+            <div class="top">&nbsp;</div>
+
+            <div class="title half-height">
+                <div class="center middle">American League</div>
+            </div>
+
+            <div class="title half-height">
+                <div class=" center middle">National League</div>
+            </div>
+        </div>
+
+        <div class="league-col">
+            <div class="top">
+                <div class="center label middle">West</div>
+            </div>
+
+            <div class="half-height">
+                <div ng-repeat="team in mlb.al.west" class="fifth-height">
+                    <div class="center middle">
+                        <img class="team" ng-src="http://cdn.bleacherreport.net/images/team_logos/50x50/{{team.name.toLowerCase().split(' ').join('_')}}.png">
+                        &nbsp;
+                        <a href="/team/{{team.abbrev}}/">{{ team.name }}</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="half-height">
+                <div ng-repeat="team in mlb.nl.west" class="fifth-height">
+                    <div class="center middle">
+                        <img class="team" ng-src="http://cdn.bleacherreport.net/images/team_logos/50x50/{{team.name.toLowerCase().split(' ').join('_')}}.png">
+                        &nbsp;
+                        <a href="/team/{{team.abbrev}}/">{{ team.name }}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="league-col">
+            <div class="top">
+                <div class="center label middle">Central</div>
+            </div>
+
+            <div class="half-height">
+                <div ng-repeat="team in mlb.al.central" class="fifth-height">
+                    <div class="center middle">
+                        <img class="team" ng-src="http://cdn.bleacherreport.net/images/team_logos/50x50/{{team.name.toLowerCase().split(' ').join('_')}}.png">
+                        &nbsp;
+                        <a href="/team/{{team.abbrev}}/">{{ team.name }}</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="half-height">
+                <div ng-repeat="team in mlb.nl.central" class="fifth-height">
+                    <div class="center middle">
+                        <img class="team" ng-src="http://cdn.bleacherreport.net/images/team_logos/50x50/{{team.name.toLowerCase().split(' ').join('_')}}.png">
+                        &nbsp;
+                        <a href="/team/{{team.abbrev}}/">{{ team.name }}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="league-col">
+            <div class="top">
+                <div class="center label middle">East</div>
+            </div>
+
+            <div class="half-height">
+                <div ng-repeat="team in mlb.al.east" class="fifth-height">
+                    <div class="center middle">
+                        <img class="team" ng-src="http://cdn.bleacherreport.net/images/team_logos/50x50/{{team.name.toLowerCase().split(' ').join('_')}}.png">
+                        &nbsp;
+                        <a href="/team/{{team.abbrev}}/">{{ team.name }}</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="half-height">
+                <div ng-repeat="team in mlb.nl.east" class="fifth-height">
+                    <div class="center middle">
+                        <img class="team" ng-src="http://cdn.bleacherreport.net/images/team_logos/50x50/{{team.name.toLowerCase().split(' ').join('_')}}.png">
+                        &nbsp;
+                        <a href="/team/{{team.abbrev}}/">{{ team.name }}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

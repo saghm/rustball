@@ -1,0 +1,206 @@
+html, body {
+    height: 100%;
+    background: black;
+    color: white;
+    margin: 0;
+}
+
+.title {
+    font-weight: bold;
+    font-size: 1.5em;
+    color: hotpink;
+    text-align: center;
+}
+
+.half-height {
+    margin-top: 3%;
+    height: 40%;
+    margin-bottom: 8.5%;
+}
+
+.top {
+    height: 7%;
+}
+
+.center {
+    text-align: center;
+}
+
+.middle {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+#container {
+    height: 90%;
+}
+
+.fifth-height {
+    height: 20%;
+}
+
+a {
+    color: cornflowerblue;
+}
+
+.gold {
+    color: goldenrod;
+}
+
+.pink {
+    color: hotpink;
+}
+
+.label {
+    font-weight: bold;
+    font-size: 1.5em;
+    margin-bottom: 4%;
+    color: aqua;
+}
+
+.avg-list {
+    margin-top: 0.5em;
+}
+
+li.font-11 {
+    font-size: 0.8em;
+}
+
+img.team-logo {
+    margin-top: 0.5em;
+    height: 2.5em;
+}
+
+.team-link {
+    color: deeppink;
+}
+
+.move-from-left {
+    padding-left: 15%
+}
+
+.bv {
+    color: blueviolet;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.league-col {
+    height: 100%;
+    width: 25%;
+    margin: 0;
+    padding: 0;
+    float: left;
+}
+
+.wide-col {
+    position: relative;
+    float: left;
+    width: 37.5%;
+    height: 100%;
+}
+
+.thin-col {
+    position: relative;
+    float: left;
+    width: 22.5%;
+    height: 100%;
+}
+
+.move-logo {
+    padding-left: 25%;
+}
+
+.col {
+    position: relative;
+    float: left;
+    width: 30%;
+    height: 100%;
+}
+
+.last-col {
+    position: relative;
+    float: left;
+    height: 100%;
+}
+
+.header {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.name {
+    font-weight: bold;
+    font-size: 2.3em;
+}
+
+.space-below {
+    margin-bottom: 5%;
+}
+
+.tag-title {
+    font-size: 1.65em;
+    font-weight: bolder;
+    margin-bottom: 0.2em;
+}
+
+#new_tag {
+    margin-top: 1em;
+}
+
+.brick {
+    color: firebrick;
+}
+
+.batters-team {
+    margin-bottom: 0.5em;
+}
+
+.font-135 {
+    font-size: 1.35em;
+}
+
+.text-right {
+    text-align: right
+}
+
+.round {
+    padding: 0.1em 0.6em;
+    border: 0.1em;
+    border-radius: 0.5em;
+    margin-top: 0.5em;
+}
+
+.tag {
+    font-size: 1.45em;
+}
+
+.move-over {
+    padding-left: 10%;
+}
+
+.position {
+    margin-top: 0.2em;
+    font-size: 2.3em;
+}
+
+.line {
+    margin: 0.2em 0;
+}
+
+.green {
+    color: forestgreen
+}
+
+.aqua {
+    color: aqua;
+}
+
+img.team {
+    height: 1em;
+}

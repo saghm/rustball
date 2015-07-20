@@ -1,0 +1,77 @@
+<html ng-app="averagesView">
+<head>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+    <script type="text/javascript">
+    var app = angular.module('averagesView', []);
+
+    app.controller('AveragesViewController', function($scope, $http) {
+        var path = window.location.pathname;
+
+        if (path.charAt(path.length - 1) === '/') {
+            path = path.slice(1, path.length - 1);
+        }
+
+        var rank = path.substring(path.lastIndexOf('/'));
+
+        $http.get('/rest_api/averages' + rank).success(function(data) {
+            $scope.list = data.result;
+            $scope.rank = rank;
+        });
+    });
+    </script>
+</head>
+
+<body>
+    <div ng-controller="AveragesViewController">
+        <div class="top move-from-left header">
+            <a href="/league/" class="bv">All teams</span>
+            &nbsp;&nbsp;&nbsp;
+            <a href="/averages/high/" class="bv" ng-show="rank === '/low'">Best hitters</a>
+            <span href="/averages/low/" class="brick" ng-hide="rank === '/low'">Best hitters</span>
+            &nbsp;&nbsp;&nbsp;
+            <a href="/averages/low/" class="bv" ng-hide="rank === '/low'">Worst hitters</a>
+            <span href="/averages/low/" class="brick" ng-show="rank === '/low'">Worst hitters</span>
+            &nbsp;&nbsp;&nbsp;
+            <a href="/tags/" class="bv">Tags</a>
+            &nbsp;&nbsp;&nbsp;
+            <a href="/batters/" class="bv">Batters by team</a>
+        </div>
+
+        <div class="move-from-left">
+            <span class="wide-col">
+                <div class="label">Name</div>
+
+                <div class="avg-list">
+                    <div ng-repeat="player in list">
+                        <a ng-href="/player/{{player._id}}/">
+                            {{ player.first_name }} {{ player.last_name }}
+                        </a>
+                    </div>
+                </div>
+             </span>
+
+            <span class="col">
+                <div class="label">Team</div>
+
+                <div class="avg-list">
+                    <div ng-repeat="player in list">
+                        <a class="team-link" href="/team/{{player.team}}/">{{ player.team }}</a>
+                    </div>
+                </div>
+            </span>
+
+            <span class="last-col">
+                <div class="label">Average</div>
+
+                <div class="avg-list">
+                    <div ng-repeat="player in list" class="text-right gold">
+                        {{ player.avg.toFixed(3).toString().slice(1) }}
+                    </div>
+                </div>
+            </span>
+        </div>
+        </div>
+    </div>
+</body>
+</html>

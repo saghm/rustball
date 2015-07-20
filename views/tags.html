@@ -1,0 +1,96 @@
+<!doctype html>
+<html ng-app="tagsView">
+<head>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+    <script type="text/javascript">
+    var app = angular.module('tagsView', []);
+
+    app.controller('TagsViewController', function($scope, $http) {
+        var path = window.location.pathname.slice(1);
+
+        if (path.endsWith('/')) {
+            path = path.slice(0, path.length - 1);
+        }
+
+        var index = path.lastIndexOf('/');
+        var tag = index === -1 ? "" : path.slice(index + 1);
+
+        $scope.searchTag = function() {
+            var tag = document.getElementById('find_tag').value.trim();
+
+            if (tag === "") {
+                return;
+            }
+
+            window.location.href = "/tags/" + tag + "/";
+        }
+
+        $http.get('/rest_api/tags/' + tag).success(function(data) {
+            $scope.list = data.result;
+            $scope.tag = unescape(tag);
+        });
+    });
+    </script>
+</head>
+
+<body>
+    <div ng-controller="TagsViewController">
+        <div class="top move-from-left header">
+            <div>
+                <a href="/league/" class="bv">All teams</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="/averages/high/" class="bv">Best hitters</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="/averages/low/" class="bv">Worst hitters</a>
+                &nbsp;&nbsp;&nbsp;
+                <span class="brick">Tags</span>
+                &nbsp;&nbsp;&nbsp;
+                <a href="/batters/" class="bv">Batters by team</a>
+            </div>
+
+            <div ng-if="tag">
+                <span class="title">Players tagged with <em class="green">{{ tag }}</em></span>
+            </div>
+
+            <div class="small-space-below">
+                <input id="find_tag" type="text" placeholder="Input a tag" class="round">
+                <button id="search_tag" class="round" ng-click="searchTag()">Search tag</button>
+            </div>
+        </div>
+
+        <div class="move-from-left" ng-if="tag">
+            <span class="wide-col">
+                <div class="label">Name</div>
+
+                <div class="avg-list">
+                    <div ng-repeat="player in list">
+                        <a ng-href="/player/{{player._id}}/">
+                            {{ player.first_name }} {{ player.last_name }}
+                        </a>
+                    </div>
+                </div>
+             </span>
+
+            <span class="col">
+                <div class="label">Team</div>
+
+                <div class="avg-list">
+                    <div ng-repeat="player in list">
+                        <a class="team-link" href="/team/{{player.team}}/">{{ player.team }}</a>
+                    </div>
+                </div>
+            </span>
+
+            <span class="last-col">
+                <div class="label">Position</div>
+
+                <div ng-repeat="player in list" class="gold">
+                    {{ player.position }}
+                </div>
+                <br>
+            </span>
+        </div>
+    </div>
+</body>
+</html>

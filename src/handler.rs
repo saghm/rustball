@@ -1,30 +1,20 @@
 use mongodb::Client;
 use rustful::{Context, Response, Handler};
 
-pub struct PageHandler(fn(Context, Response));
-
-pub struct RequestHandler {
-    client: Client,
-    handler: fn(Client, Context, Response),
+pub enum AppHandler {
+    Page(fn(Context, Response)),
+    Request {
+        client: Client,
+        handler: fn(Client, Context, Response),
+    },
 }
 
-impl RequestHandler {
-    pub fn new(client: Client,
-               handler: fn(Client, Context, Response)) -> RequestHandler {
-        RequestHandler { client: client, handler: handler }
-    }
-}
-
-
-impl Handler for PageHandler {
+impl Handler for AppHandler {
     fn handle_request(&self, context: Context, response: Response) {
-        self.0(context, response);
-    }
-}
+        match self {
+            &AppHandler::Page(handler) => handler(context, response),
+            &AppHandler::Request { ref client, handler } => handler(client.clone(), context, response)
+        }
 
-impl Handler for RequestHandler {
-    fn handle_request(&self, context: Context, response: Response) {
-        let handler = self.handler;
-        handler(self.client.clone(), context, response);
     }
 }
