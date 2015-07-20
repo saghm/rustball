@@ -1,7 +1,7 @@
 rustball
 ========
 
-Simple REST API to demo the MongoDB Rust driver (https://github.com/mongodbinc-interns/mongo-rust-driver-prototype).
+Simple webapp to demo the MongoDB Rust driver (https://github.com/mongodbinc-interns/mongo-rust-driver-prototype).
 
 Setup
 -----
@@ -17,7 +17,10 @@ Setup
 Usage
 -----
 
-### API endpoints
+1.	Load the page `localhost:3000/league` (or any of the other defined pages) in your browser and start using the app!
+
+REST API
+--------
 
 -	`/averages/high`
 	-	Type: GET
@@ -25,26 +28,29 @@ Usage
 -	`/averages/low`
 	-	Type: GET
 	-	Response: list of bottom 20 hitters by average
--	`/players/tag/:tag`
-	-	Type: Get
-	-	Response: list of players who have the given tag
--	`/tags/player/:id`
+-	`/batters`
+	-	Type: GET
+	-	Response: list of teams with left-handed and right-handed batters grouped
+-	`/league`
+	-	Type: GET
+	-	Response: list of all teams
+-	`/player/:id`
 	-	Type: GET
 	-	Response: single document with the player's info and tags
--	`/tags/player/:id/add`
+-	`/player/:id/add_tag`
 	-	Type: POST
 	-	JSON data: "tag" => tag to add to player
 	-	Response: object specifying success or error
--	`/teams`
-	-	Type: GET
-	-	Response: list of all teams
--	`/teams/batters`
-	-	Type: GET
-	-	Response: list of teams with left-handed and right-handed batters grouped
--	`/teams/:team`
+-	`/tags/:tag`
+	-	Type: Get
+	-	Response: list of players who have the given tag
+-	`/team/:team`
 	-	Type: GET
 	-	Response: list of players on the team
 	-	Examples
 		-	`/team/BOS`
 		-	`/team/PHI`
 		-	`/team/KC`
+-	`/team/:team/name`
+	-	Type: GET
+	-	Response: Full name of the team
