@@ -1,0 +1,25 @@
+.fifth-height {
+    height: 20%;
+}
+
+.half-height {
+    margin-top: 3%;
+    height: 40%;
+    margin-bottom: 8.5%;
+}
+
+.league-col {
+    height: 100%;
+    width: 25%;
+    margin: 0;
+    padding: 0;
+    float: left;
+}
+
+.center {
+    text-align: center;
+}
+
+#container {
+    height: 90%;
+}

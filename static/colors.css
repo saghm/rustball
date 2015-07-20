@@ -1,0 +1,41 @@
+html, body {
+    background: black;
+    color: white;
+}
+
+a {
+    color: cornflowerblue;
+}
+
+.gold {
+    color: goldenrod;
+}
+
+.pink {
+    color: hotpink;
+}
+
+
+.team-link {
+    color: deeppink;
+}
+
+.bv {
+    color: blueviolet;
+}
+
+.brick {
+    color: firebrick;
+}
+
+.lightgreen {
+    color: lightgreen;
+}
+
+.green {
+    color: forestgreen
+}
+
+.aqua {
+    color: aqua;
+}

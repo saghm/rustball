@@ -1,0 +1,15 @@
+img.team-logo {
+    height: 2.5em;
+    margin-right: 1em;
+}
+
+.thin-col {
+    position: relative;
+    float: left;
+    width: 22.5%;
+    height: 100%;
+}
+
+.float-left {
+    float: left;
+}

@@ -2,6 +2,8 @@
 <html ng-app="tagsView">
 <head>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/colors.css">
+    <link rel="stylesheet" href="/static/tags.css">    
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
     <script type="text/javascript">
     var app = angular.module('tagsView', []);
@@ -63,7 +65,7 @@
             <span class="wide-col">
                 <div class="label">Name</div>
 
-                <div class="avg-list">
+                <div class="top-margin">
                     <div ng-repeat="player in list">
                         <a ng-href="/player/{{player._id}}/">
                             {{ player.first_name }} {{ player.last_name }}
@@ -75,7 +77,7 @@
             <span class="col">
                 <div class="label">Team</div>
 
-                <div class="avg-list">
+                <div class="top-margin">
                     <div ng-repeat="player in list">
                         <a class="team-link" href="/team/{{player.team}}/">{{ player.team }}</a>
                     </div>

@@ -2,6 +2,8 @@
 <html ng-app="teamView">
 <head>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/colors.css">
+    <link rel="stylesheet" href="/static/team.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
     <script type="text/javascript">
     var app = angular.module('teamView', []);
@@ -27,7 +29,7 @@
 </head>
 
 <body>
-    <div ng-controller="TeamViewController">
+    <div ng-controller="TeamViewController" id="screen">
         <div class="top move-from-left header">
             <div>
                 <a href="/league/" class="bv">All teams</a>
@@ -40,8 +42,11 @@
                 &nbsp;&nbsp;&nbsp;
                 <a href="/batters/" class="bv">Batters by team</a>
             </div>
+        </div>
 
-            <img class="team-logo" ng-src="http://cdn.bleacherreport.net/images/team_logos/150x150/{{team_name.toLowerCase().split(' ').join('_')}}.png">
+        <div class="move-from-left larger-top">
+            <img class="team-logo float-left" ng-src="http://cdn.bleacherreport.net/images/team_logos/150x150/{{team_name.toLowerCase().split(' ').join('_')}}.png">
+            <div class="name float-left">{{ team_name }}</div>
         </div>
 
         <div class="move-from-left">

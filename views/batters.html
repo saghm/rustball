@@ -2,6 +2,8 @@
 <html ng-app="battersView">
 <head>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/batters.css">
+    <link rel="stylesheet" href="/static/colors.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
     <script type="text/javascript">
     var app = angular.module('battersView', []);
@@ -57,7 +59,7 @@
             <div ng-repeat="team in teams" class="batters-team aqua">
                 <div ng-show="full_names[team._id]">
                     <img ng-click="setTeam(team._id)" class="team pointer" ng-src="http://cdn.bleacherreport.net/images/team_logos/50x50/{{full_names[team._id].toLowerCase().split(' ').join('_')}}.png">
-                    <span ng-click="setTeam(team._id)" class="font-135 pointer">&nbsp;{{ full_names[team._id] }}</span>
+                    <span ng-click="setTeam(team._id)" class="lightgreen font-135 pointer">&nbsp;{{ full_names[team._id] }}</span>
 
                     <div ng-show="show === team._id">
                         <ul>

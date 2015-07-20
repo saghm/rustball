@@ -2,6 +2,8 @@
 <html ng-app="leagueView">
 <head>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/colors.css">
+    <link rel="stylesheet" href="/static/league.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
     <script type="text/javascript">
     var app = angular.module('leagueView', []);
@@ -29,7 +31,7 @@
 
     <div ng-controller="LeagueViewController" id="container">
         <div class="league-col wide">
-            <div class="top">&nbsp;</div>
+            <div class="smaller-top">&nbsp;</div>
 
             <div class="title half-height">
                 <div class="center middle">American League</div>
@@ -41,7 +43,7 @@
         </div>
 
         <div class="league-col">
-            <div class="top">
+            <div class="smaller-top">
                 <div class="center label middle">West</div>
             </div>
 
@@ -67,7 +69,7 @@
         </div>
 
         <div class="league-col">
-            <div class="top">
+            <div class="smaller-top">
                 <div class="center label middle">Central</div>
             </div>
 
@@ -93,7 +95,7 @@
         </div>
 
         <div class="league-col">
-            <div class="top">
+            <div class="smaller-top">
                 <div class="center label middle">East</div>
             </div>
 
