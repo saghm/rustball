@@ -1,6 +1,5 @@
-use rustful::{Context, Response};
+use rustful::{Context, Response, StatusCode};
 use rustful::header::ContentType;
-use rustful::StatusCode;
 
 use std::fs::File;
 use std::io::Read;
@@ -13,12 +12,6 @@ macro_rules! render_file {
         file.read_to_string(&mut html).unwrap();
         $response.send(format!("{}", html))
     }};
-}
-
-macro_rules! set_content_type {
-    ($response:expr, $mime_type:ident / $subtype:ident) => {
-        $response.headers_mut().set(ContentType(content_type!($mime_type / $subtype; Charset = Utf8)))
-    };
 }
 
 pub fn render_html(file: &str, mut response: Response) {

@@ -1,7 +1,11 @@
 #[macro_use]
 extern crate bson;
+extern crate cookie;
+extern crate hyper;
 extern crate mongodb;
+extern crate oauthcli;
 extern crate rustc_serialize;
+extern crate url;
 
 #[macro_use]
 extern crate rustful;
@@ -13,13 +17,17 @@ mod macros;
 mod server;
 
 use std::net::Ipv4Addr;
+use std::sync::Arc;
 
 use handler::AppHandler;
+use hyper::Client as HttpClient;
 use mongodb::{Client, ThreadedClient};
 use rustful::{Server, TreeRouter};
+use server::{oauth, page};
 
 fn main() {
-    let client = Client::connect("localhost", 27017).unwrap();
+    let mongo = Client::connect("localhost", 27017).unwrap();
+    let http = Arc::new(HttpClient::new());
 
     macro_rules! page_route {
         ($file:ident) => {
@@ -29,7 +37,8 @@ fn main() {
 
     macro_rules! request_route {
         ($func:ident) => {
-            AppHandler::Request { client: client.clone(), handler: server::rest_api::$func }
+            AppHandler::Request { client: mongo.clone(), handler:
+                                  server::rest_api::$func }
         };
     }
 
@@ -39,6 +48,11 @@ fn main() {
         fallback_handler: Some(AppHandler::NotFound),
         handlers: insert_routes! {
             TreeRouter::new() => {
+                // Twitter sign-in
+                "/sign_in" => Get: AppHandler::SignIn { mongo: mongo.clone(),
+                                                        http:http.clone(),
+                                                        handler: oauth::sign_in },
+
                 // Pages
                 "/averages/:rank" => Get: page_route!(averages),
                 "/batters" => Get: page_route!(batters),
@@ -60,7 +74,7 @@ fn main() {
                 "/rest_api/team/:team/name" => Get: request_route!(team_name),
 
                 // Static
-                "/static/css/:file" => Get: AppHandler::Css
+                "/static/css/:file" => Get: AppHandler::Default(page::render_css)
             }
         },
 

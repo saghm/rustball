@@ -4,8 +4,12 @@ version = "0.1.0"
 authors = ["Saghm Rossi <saghmrossi@gmail.com>"]
 
 [dependencies]
-rustful = "0.3.0"
+cookie = "0.1.21"
+hyper = "0.6.4"
+oauthcli="0.0.7"
 rustc-serialize = "0.3.15"
+rustful = "0.3.0"
+url = "0.2.36"
 
 [dependencies.bson]
 git = "https://github.com/zonyitoo/bson-rs"

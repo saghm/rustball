@@ -453,6 +453,7 @@ pub fn player_tags(client: Client, context: Context, response: Response) {
         Some(doc) => format!("{{\"result\":{}}}", Bson::Document(doc).to_json()),
         None => "{}".to_owned()
     };
+
     response.send(string)
 }
 
