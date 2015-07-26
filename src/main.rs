@@ -22,7 +22,7 @@ use rustful::{Server, TreeRouter};
 use server::{oauth, page};
 
 fn main() {
-    let mongo = Client::connect("localhost", 27017).unwrap();
+    let mongo = Client::connect("localhost", 27017).ok().expect("Unable to connect to database");
     let http = Arc::new(HttpClient::new());
 
     macro_rules! page_route {
