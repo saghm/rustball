@@ -1,19 +1,15 @@
-#[macro_use]
-extern crate bson;
+#[macro_use] extern crate bson;
 extern crate cookie;
 extern crate hyper;
 extern crate mongodb;
 extern crate oauthcli;
 extern crate rustc_serialize;
 extern crate url;
+#[macro_use] extern crate rustful;
 
-#[macro_use]
-extern crate rustful;
-
+mod credentials;
 mod handler;
-
-#[macro_use]
-mod macros;
+#[macro_use] mod macros;
 mod server;
 
 use std::net::Ipv4Addr;

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::io::Read;
 use std::sync::Arc;
 
+use credentials::{CONSUMER_KEY, CONSUMER_SECRET};
 use hyper::Client as HttpClient;
 use hyper::header::Authorization;
 use mongodb::{Client, ThreadedClient};
@@ -33,8 +34,8 @@ pub fn sign_in(mongo: Client, http: Arc<HttpClient>, mut context: Context,
         "POST",
         Url::parse(url).unwrap(),
         None,
-        "XuwnrGlWqgKBKHCoBdwaTcV1j",
-        "rYquWNGyS4IkreUYVb2y3BObZ6Fbf6qKHFMJIB0xOjIQ0oHVVa",
+        CONSUMER_KEY,
+        CONSUMER_SECRET,
         None,
         None,
         SignatureMethod::HmacSha1,
