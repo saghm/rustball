@@ -9,7 +9,7 @@ rustc-serialize = "0.3.15"
 
 [dependencies.bson]
 git = "https://github.com/zonyitoo/bson-rs"
-ref = "a62d7448682455642e759088138592a508c25150"
+branch = "master"
 
 [dependencies.mongodb]
 git = "https://github.com/mongodbinc-interns/mongo-rust-driver-prototype"
