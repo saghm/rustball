@@ -6,7 +6,6 @@ use mongodb::db::ThreadedDatabase;
 use mongodb::coll::options::FindOptions;
 use mongodb::error::Result as MongoResult;
 use rustful::{Context, Response};
-use rustful::context::ExtQueryBody;
 
 macro_rules! json_error_string {
     ($string:expr) => {
@@ -59,11 +58,11 @@ macro_rules! aggregate {
 macro_rules! get_id {
     ($context:expr, $response:expr) => {{
         let id_str = match $context.variables.get("id") {
-            Some(name) => &name[..],
+            Some(name) => name,
             None => return respond_with_json_err!($response, "No id specified")
         };
 
-        let id = match ObjectId::with_string(id_str) {
+        let id = match ObjectId::with_string(&id_str[..]) {
             Ok(oid) => oid,
             Err(e) => return respond_with_json_err!($response, e)
         };
@@ -149,7 +148,7 @@ pub fn lowest_averages(client: Client, _context: Context, response: Response) {
 
 pub fn tagged_players(client: Client, context: Context, response: Response) {
     let tag = match context.variables.get("tag") {
-        Some(tag) => &tag[..],
+        Some(tag) => tag.into_owned(),
         None => return respond_with_json_err!(response, "No tag specified")
     };
 
@@ -465,7 +464,7 @@ pub fn add_tag(client: Client, mut context: Context, response: Response) {
     };
 
     let tag = match body.get("tag") {
-        Some(string) => string.as_ref(),
+        Some(string) => string.into_owned(),
         None => return respond_with_json_err!(response, "No tag specified")
     };
 
@@ -474,7 +473,7 @@ pub fn add_tag(client: Client, mut context: Context, response: Response) {
 
     let db = client.db("mlb");
     let coll = db.collection("players");
-    match coll.update_one(filter, update, false, None) {
+    match coll.update_one(filter, update, None) {
         Ok(_) => response.send("{\"result\":\"ok\"}"),
         Err(e) => respond_with_json_err!(response, e)
     }
@@ -482,7 +481,7 @@ pub fn add_tag(client: Client, mut context: Context, response: Response) {
 
 pub fn team_roster(client: Client, context: Context, response: Response) {
     let team = match context.variables.get("team") {
-        Some(team_name) => &team_name[..],
+        Some(team_name) => team_name.into_owned(),
         None => return respond_with_json_err!(response, "No team specified")
     };
 

@@ -4,13 +4,8 @@ version = "0.1.0"
 authors = ["Saghm Rossi <saghmrossi@gmail.com>"]
 
 [dependencies]
-rustful = "0.3.0"
+rustful = "0.6.0"
 rustc-serialize = "0.3.15"
+mongodb = "0.1.1"
+bson = "0.1.5"
 
-[dependencies.bson]
-git = "https://github.com/zonyitoo/bson-rs"
-branch = "master"
-
-[dependencies.mongodb]
-git = "https://github.com/mongodbinc-interns/mongo-rust-driver-prototype"
-branch = "1.0"
