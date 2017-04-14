@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate bson;
 extern crate mongodb;
-extern crate rustc_serialize;
+extern crate serde_json;
 
 #[macro_use]
 extern crate rustful;

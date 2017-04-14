@@ -1,11 +1,10 @@
 [package]
+authors = ["Saghm Rossi <saghmrossi@gmail.com>"]
 name = "rustball"
 version = "0.1.0"
-authors = ["Saghm Rossi <saghmrossi@gmail.com>"]
 
 [dependencies]
-rustful = "0.6.0"
-rustc-serialize = "0.3.15"
-mongodb = "0.1.1"
-bson = "0.1.5"
-
+bson = "0.6.1"
+mongodb = "0.2.6"
+rustful = "0.9.0"
+serde_json = "0.9.10"

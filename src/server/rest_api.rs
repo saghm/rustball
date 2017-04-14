@@ -5,6 +5,7 @@ use mongodb::cursor::Cursor;
 use mongodb::db::ThreadedDatabase;
 use mongodb::coll::options::FindOptions;
 use mongodb::error::Result as MongoResult;
+use serde_json::Value;
 use rustful::{Context, Response};
 
 macro_rules! json_error_string {
@@ -14,9 +15,10 @@ macro_rules! json_error_string {
 }
 
 macro_rules! json_string_from_doc {
-    ($doc:expr) => {
-        format!("{}", Bson::Document($doc).to_json())
-    };
+    ($doc:expr) => {{
+        let v: Value = Bson::Document($doc).clone().into();
+        format!("{}", v)
+    }}
 }
 
 macro_rules! find {
@@ -74,7 +76,7 @@ macro_rules! get_id {
 fn json_string_from_doc_result(result: MongoResult<Document>) -> Result<String, String> {
     match result {
         Ok(doc) => Ok(json_string_from_doc!(doc)),
-        Err(e) => Err(json_error_string!(e))
+        Err(e) => Err(json_error_string!(e)),
     }
 }
 
@@ -84,7 +86,7 @@ fn get_json_string(result: MongoResult<Cursor>) -> String {
             match cursor.has_next() {
                 Ok(true) => (),
                 Ok(false) => return json_error_string!("Invalid team"),
-                Err(e) => return json_error_string!(e)
+                Err(e) => return json_error_string!(e),
             }
 
             let mut string = "{\"result\":[".to_owned();
@@ -99,15 +101,15 @@ fn get_json_string(result: MongoResult<Cursor>) -> String {
                         };
 
                         string.push_str(&new_string);
-                    },
-                    Err(e) => return e
+                    }
+                    Err(e) => return e,
                 }
             }
 
             string.push_str("]}");
             string
-        },
-        Err(e) => json_error_string!(e)
+        }
+        Err(e) => json_error_string!(e),
     }
 }
 
@@ -117,7 +119,7 @@ fn averages(high: bool, client: Client, response: Response) {
     });
 
     let mut options = FindOptions::new();
-    options.limit = 20;
+    options.limit = Some(20);
 
     options.projection = Some(doc! {
         "first_name" => 1,
@@ -149,10 +151,10 @@ pub fn lowest_averages(client: Client, _context: Context, response: Response) {
 pub fn tagged_players(client: Client, context: Context, response: Response) {
     let tag = match context.variables.get("tag") {
         Some(tag) => tag.into_owned(),
-        None => return respond_with_json_err!(response, "No tag specified")
+        None => return respond_with_json_err!(response, "No tag specified"),
     };
 
-    let filter  = Some(doc!{ "tags" => tag });
+    let filter = Some(doc!{ "tags" => tag });
     let mut options = FindOptions::new();
 
     options.projection = Some(doc! {
@@ -175,7 +177,7 @@ pub fn tagged_players(client: Client, context: Context, response: Response) {
 pub fn team_name(_client: Client, context: Context, response: Response) {
     let team = match context.variables.get("team") {
         Some(abbrev) => abbrev,
-        None => return respond_with_json_err!(response, "No team specified")
+        None => return respond_with_json_err!(response, "No team specified"),
     };
 
     let name = match team.as_ref() {
@@ -209,10 +211,10 @@ pub fn team_name(_client: Client, context: Context, response: Response) {
         "TEX" => "Texas Rangers",
         "TOR" => "Toronto Blue Jays",
         "WAS" => "Washington Nationals",
-        _ => return respond_with_json_err!(response, "Invalid team")
+        _ => return respond_with_json_err!(response, "Invalid team"),
     };
 
-    return response.send(format!("{{\"result\":\"{}\"}}", name))
+    return response.send(format!("{{\"result\":\"{}\"}}", name));
 }
 
 fn get_teams_in_bson() -> Document {
@@ -357,13 +359,13 @@ fn get_teams_in_bson() -> Document {
 }
 
 pub fn teams(_client: Client, _context: Context, response: Response) {
-    response.send(format!("{}", Bson::Document(get_teams_in_bson()).to_json()));
+    let v: Value = Bson::Document(get_teams_in_bson()).clone().into();
+    response.send(format!("{}", v));
 }
 
 pub fn team_batters(client: Client, _context: Context, response: Response) {
-    let pipeline = vec![
-        doc! { "$match" => { "position" => { "$ne" => "P" } } },
-        doc! {
+    let pipeline = vec![doc! { "$match" => { "position" => { "$ne" => "P" } } },
+                        doc! {
             "$project" => {
                 "team" => 1,
                 "bats" => 1,
@@ -374,7 +376,7 @@ pub fn team_batters(client: Client, _context: Context, response: Response) {
                 }
             }
         },
-        doc! {
+                        doc! {
             "$group" => {
                 "_id" => "$team",
                 "B" => {
@@ -405,19 +407,18 @@ pub fn team_batters(client: Client, _context: Context, response: Response) {
                 }
             }
         },
-        doc! {
+                        doc! {
             "$project" => {
                 "B" => { "$setDifference" => ["$B", [Bson::Null]] },
                 "L" => { "$setDifference" => ["$L", [Bson::Null]] },
                 "R" => { "$setDifference" => ["$R", [Bson::Null]] }
             }
         },
-        doc! {
+                        doc! {
             "$sort" => {
                 "_id" => 1
             }
-        }
-    ];
+        }];
 
     let db = client.db("mlb");
     let coll = db.collection("players");
@@ -445,12 +446,15 @@ pub fn player_tags(client: Client, context: Context, response: Response) {
     let result = coll.find_one(filter, Some(options));
     let doc_opt = match result {
         Ok(opt) => opt,
-        Err(e) => return response.send(json_error_string!(e))
+        Err(e) => return response.send(json_error_string!(e)),
     };
 
     let string = match doc_opt {
-        Some(doc) => format!("{{\"result\":{}}}", Bson::Document(doc).to_json()),
-        None => "{}".to_owned()
+        Some(doc) => {
+            let v: Value = Bson::Document(doc).clone().into();
+            format!("{{\"result\":{}}}", v)
+        }
+        None => "{}".to_owned(),
     };
     response.send(string)
 }
@@ -460,12 +464,12 @@ pub fn add_tag(client: Client, mut context: Context, response: Response) {
 
     let body = match context.body.read_query_body() {
         Ok(body) => body,
-        Err(e) => return respond_with_json_err!(response, e)
+        Err(e) => return respond_with_json_err!(response, e),
     };
 
     let tag = match body.get("tag") {
         Some(string) => string.into_owned(),
-        None => return respond_with_json_err!(response, "No tag specified")
+        None => return respond_with_json_err!(response, "No tag specified"),
     };
 
     let filter = doc! { "_id" => id };
@@ -475,14 +479,14 @@ pub fn add_tag(client: Client, mut context: Context, response: Response) {
     let coll = db.collection("players");
     match coll.update_one(filter, update, None) {
         Ok(_) => response.send("{\"result\":\"ok\"}"),
-        Err(e) => respond_with_json_err!(response, e)
+        Err(e) => respond_with_json_err!(response, e),
     }
 }
 
 pub fn team_roster(client: Client, context: Context, response: Response) {
     let team = match context.variables.get("team") {
         Some(team_name) => team_name.into_owned(),
-        None => return respond_with_json_err!(response, "No team specified")
+        None => return respond_with_json_err!(response, "No team specified"),
     };
 
     let filter = Some(doc! {
@@ -505,3 +509,4 @@ pub fn team_roster(client: Client, context: Context, response: Response) {
 
     find!(client, filter, options, response)
 }
+
